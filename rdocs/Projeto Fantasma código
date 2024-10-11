@@ -4,7 +4,9 @@ library(readxl)
 library(dplyr)
 library(ggplot2)
 
+
 # Importação do banco de dados
+#:)
 
 
 Athenas <- (read_excel("PS/Olimpiadas 2000 - 2016.xlsx", sheet =1))
@@ -20,6 +22,7 @@ colnames(Athenas)[colnames(Athenas) == "Gender"] <- "Sex"
 colnames(Athenas)[colnames(Athenas) == "Height (cm)"] <- "Height"
 colnames(Athenas)[colnames(Athenas) == "Weight (lbs)"] <- "Weight"
 Athenas$Year <- 2004
+
 
 colnames(Beijing)[colnames(Beijing) == "Names"] <- "Name"
 Beijing$Year <- 2008
