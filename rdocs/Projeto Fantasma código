@@ -3,17 +3,58 @@
 library(readxl)
 library(dplyr)
 library(ggplot2)
+library(pacman)
+
+#Padronizações Estat
+
+suppressMessages(suppressWarnings(
+  suppressPackageStartupMessages(
+    pacman::p_load(
+      tidyverse, data.table, readxl, readr, ggcorrplot, cowplot,
+      RColorBrewer, scales, nortest, xlsx,
+      skimr, xtable, geobr, sf, ggrepel, abjutils, grDevices
+    )
+  )
+))
+
+cores_estat <- c(
+  "#A11D21", "#003366", "#CC9900", "#663333", "#FF6600",
+  "#CC9966", "#999966", "#006606", "#008091", "#041835",
+  "#666666")
+
+theme_estat <- function(...) {
+  theme <- ggplot2::theme_bw() +
+    ggplot2::theme(
+      axis.title.y = ggplot2::element_text(colour = "black", size = 10),
+      axis.title.x = ggplot2::element_text(colour = "black", size = 10),
+      axis.text = ggplot2::element_text(colour = "black", size = 10),
+      panel.border = ggplot2::element_blank(),
+      axis.line = ggplot2::element_line(colour = "black"),
+      text = element_text(family = "sans", size = 12),
+      legend.position = "top",
+      ...
+    )
+  return(
+    list(
+      theme,
+      scale_fill_manual(values = cores_estat),
+      scale_colour_manual(values = cores_estat),
+      scale_y_continuous(
+        labels = scales::number_format(decimal.mark = ',',
+                                       #accuracy = 0.01,
+                                       big.mark = "."))
+    )
+  )
+}
+
+#Importação do banco de dados
 
 
-# Importação do banco de dados
-#:)
-
-
-Athenas <- (read_excel("PS/Olimpiadas 2000 - 2016.xlsx", sheet =1))
-London <- (read_excel("PS/Olimpiadas 2000 - 2016.xlsx", sheet =2))
-Rio <- (read_excel("PS/Olimpiadas 2000 - 2016.xlsx", sheet =3))
-Sydney <- (read_excel("PS/Olimpiadas 2000 - 2016.xlsx", sheet =4))
-Beijing <- (read_excel("PS/Olimpiadas 2000 - 2016.xlsx", sheet =5))
+Athenas <- (read_excel("~/PS/Olimpiadas 2000 - 2016.xlsx", sheet =1))
+London <- (read_excel("~/PS/Olimpiadas 2000 - 2016.xlsx", sheet =2))
+Rio <- (read_excel("~/PS/Olimpiadas 2000 - 2016.xlsx", sheet =3))
+Sydney <- (read_excel("~/PS/Olimpiadas 2000 - 2016.xlsx", sheet =4))
+Beijing <- (read_excel("~/PS/Olimpiadas 2000 - 2016.xlsx", sheet =5))
 
 #Padronização das Colunas por Name, Sex, Age, Height, Weight, Team, Sport, Event, Medal e Year 
 
@@ -22,7 +63,6 @@ colnames(Athenas)[colnames(Athenas) == "Gender"] <- "Sex"
 colnames(Athenas)[colnames(Athenas) == "Height (cm)"] <- "Height"
 colnames(Athenas)[colnames(Athenas) == "Weight (lbs)"] <- "Weight"
 Athenas$Year <- 2004
-
 
 colnames(Beijing)[colnames(Beijing) == "Names"] <- "Name"
 Beijing$Year <- 2008
@@ -56,46 +96,18 @@ Medalhistas_mulheres <- Olimpiadas %>%
   summarise(total_medalhas = n()) %>%
   arrange(desc(total_medalhas))
 
-top_25 <- head(Medalhistas_mulheres, 25)
+top_5 <- head(Medalhistas_mulheres, 5)
 
-top_25_grafico <- ggplot(top_25, aes(x = reorder(Team, total_medalhas), y = total_medalhas)) + 
+top_5_grafico <- ggplot(top_5, aes(x = reorder(Team, total_medalhas), y = total_medalhas)) + 
   geom_bar(stat = "identity", fill = "#a11d21") +  # Cor das barras
    coord_flip() +
-  labs(title = "Top 20 Países com Mais Medalhistas Mulheres",
+  labs(title = "Figura 1 - Top 5 Países com Mais Medalhistas Mulheres",
        x = "País",
        y = "Número de Medalhas") +
-  theme_minimal()
-
-#Anaise 1- Medalhas por numero de mulheres
-
-dados_femininos <- Olimpiadas %>%
-  filter(Sex == "F")
-
-medalhas_por_pais <- dados_femininos %>%
-  filter(!is.na(Medal)) %>%  # Filtrar apenas as linhas com medalhas
-  group_by(Team) %>%
-  summarise(total_medalhas = n(), .groups = 'drop')
-
-total_competidoras_por_pais <- dados_femininos %>%
-  group_by(Team) %>%
-  summarise(total_competidoras = n(), .groups = 'drop')
-
-resultado <- medalhas_por_pais %>%
-  left_join(total_competidoras_por_pais, by = "Team") %>%
-  mutate(razao_medalhas_por_competidora = total_medalhas / total_competidoras)
-
-resultado_top25 <- resultado %>%
-  slice_max(razao_medalhas_por_competidora, n = 25)
-
-# Visualizar os resultados
-print(resultado_top25)
-
-# Criar um gráfico de barras para visualizar a razão de medalhas por competidora
-resultado_top25_grafico <- ggplot(resultado_top25, aes(x = reorder(Team, -razao_medalhas_por_competidora), y = razao_medalhas_por_competidora)) +
-  geom_bar(stat = "identity", fill = "steelblue") +
-  labs(title = "Top 25 Países: Razão de Medalhas por Competidora",
-       x = "País",
-       y = "Razão de Medalhas por Competidora") +
-  theme_minimal() +
-  theme(axis.text.x = element_text(angle = 45, hjust = 1))
+  theme_estat() +
+  geom_text(aes(label = total_medalhas), 
+            position = position_stack(vjust = 1), 
+            hjust = -0.1,  # Ajuste horizontal para posicionar o texto
+            color = "black")  # Cor do texto
+print(top_5_grafico)
 
