@@ -1,0 +1,50 @@
+---
+title: "Projeto Fantasma - House of Excellence"
+---
+
+# Introdução
+
+Este relátorio tem como objetivo otimizar o desempenho de atletas de elite que participaram das Olimpíadas de Verão de 2000 a 2016, com foco na análise dos fatores que podem afetar diretamente o sucesso desses atletas. Para alcançar esse objetivo, serão realizadas análises estatísticas descritivas e de correlação que facilitarão a identificação de padrões importantes . O nível de significância utilizado nas análises será...
+
+O banco de dados utilizado foi fornecido pelo cliente, contendo informações sobre todos os participantes das Olimpíadas de Verão de 2000 a 2016. A coleta foi realizada de forma detalhada, com a divisão dos dados por nome, sexo, idade, altura (em centímetros), peso (em libras), país, esporte, evento e medalhas, caso o atleta tenha conquistado alguma. O banco de dados está organizado em formato Excel, com uma aba separada para cada edição olímpica.
+
+As análises estatísticas foram realizadas por meio do software R, na versão 4.4.1As análises estatísticas foram realizadas por meio do software R, na versão 4.4.1
+
+# Referencial Teórico
+
+Este relatório é composto por tecnicas estatisticas que serâo descritas a seguir de acordo com o que foi utilizado em tal estudo.
+
+# Análises
+
+## Análise 1 - Top 5 países com maior número de mulheres medalhistas (13/10)
+
+O cliente gostaria de entender quais países possuem um maior número de mulheres que conquistaram medalhas, em ordem do país com maior número de mulheres medalhistas para o país com menor número. Para isso, comparamos uma variável qualitativa, que representa os diferentes países, e uma variável quantitativa, que indica a quantidade total de medalhas conquistadas por mulheres em cada um desses países.
+
+### Figura 1- Top 5 países com mais medalhistas mulheres
+
+## ![Figura 1 - Top 5 Países com Mais Medalhistas Mulheres](Figura%201.pdf)
+
+Avaliando a figura 1, podemos observar como os Estados Unidos apresenta um numero de medalhas significantemente maior do que os outros. Em seguida Russia, China e Australia apresentam um numero mais proximos e por fim a Alemanha em quinto.
+
+## Análise 2 - Valor IMC por esporte, estes sendo, ginástica, futebol, judô, atletismo e badminton (20/10)
+
+O cliente deseja comparar os valores do Índice de Massa Corporal (IMC) entre atletas de diferentes esportes, especificamente ginástica, judô, atletismo e badminton, para entender a variação entre eles e identificar se algum esporte tende a ter IMCs geralmente menores, maiores ou se não há diferença significativa. Para isso, é necessário calcular o IMC de cada atleta utilizando a fórmula peso (kg) / altura (m)² e, em seguida, analisar os resultados para cada esporte selecionado, observando como os valores se comportam em relação aos esportes mencionados. Faremos a analise de uma variável quantitativa, que é o IMC de cada atleta, que será resultante de outras duas, o peso e a altura, e de uma qualitativa, que é o esporte de cadaa atleta, por fim, observarmeros como os valores se relacionam.
+
+### Figura 2- IMC por Esportes
+
+![](poresportefinal.pdf)
+
+```{r}
+#tabela_IMC
+#não to conseguindo fazer essa tabela em latex ou passar pra pdf
+```
+
+Por meio dos dados apresentados no grafico e na tabela, percebemos que os valores médios do IMC dos atletas por esporte é proximo, com um destaque para o judô que tem essa media um pouco mais alta. A variancia, no entanto, é bem mais alta para o atletismo e ainda mais para o judô.
+
+## Análise 3 - Top 3 medalhistas gerais por quantidade de cada tipo de medalha (27/10)
+
+O intuito dessa análise é primeiro entender quais são os 3 medalhistas com maior número de medalhas no total, e dentre eles, observar a quantidade de cada tipo de medalha que cada um destes atletas conquistou, sendo ouro, prata ou bronze. Existe relação entre o medalhista e cada tipo de medalha conquistada?
+
+## Análise 4 - Variação Peso por Altura (03/10)
+
+O intuito é entender a relação entre o peso e altura dos atletas. À medida que o peso aumenta, a altura também aumenta? Ou o contrário, ou não tem diferença, ou não dá pra inferir nada? ● Para o relatório, vocês devem considerar apenas os atletas medalhistas;Conclusões
