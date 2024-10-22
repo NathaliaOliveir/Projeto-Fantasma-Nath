@@ -12,6 +12,9 @@ library(gt)
 
 #Padronizações Estat
 
+:0 teste
+
+
 suppressMessages(suppressWarnings(
   suppressPackageStartupMessages(
     pacman::p_load(
@@ -174,4 +177,24 @@ tabela_IMC <- Olimpiadas %>%
     `Média IMC` = Media_IMC,
     `Variância IMC` = Variancia_IMC
   )
+
+
+#Analise 3
+
+
+contagem_nomes <- Olimpiadas %>%
+  group_by(Name) %>%
+  summarise(frequencia = n()) %>%
+  arrange(desc(frequencia))
+
+# 2. Selecionar os 3 nomes mais frequentes
+top3_nomes <- head(contagem_nomes, 3)
+
+# 3. Criar um dataframe com o número de medalhas
+
+medalhas_top3 <- Olimpiadas %>%
+  filter(Name %in% top3_nomes$Name) %>%
+  group_by(Name) %>%
+  summarise(total_medalhas = sum(Medal))
+
 
