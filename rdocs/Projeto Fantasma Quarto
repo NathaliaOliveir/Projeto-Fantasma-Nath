@@ -1,0 +1,37 @@
+---
+title: "Projeto Fantasma - House of Excellence"
+format: html
+editor: visual
+---
+
+Introdução
+
+Este projeto, solicitado por João Neves, proprietário da House of Excellence, visa otimizar o desempenho de atletas de elite que participaram das Olimpíadas de 2000 a 2016. A proposta inclui a realização de análises estatísticas detalhadas, apresentadas em um relatório que seguirá um escopo específico. Além disso, desenvolveremos um dashboard interativo no Power BI, que permitirá uma visualização dinâmica dos dados, incorporando análises e métricas adicionais que consideramos relevantes. O objetivo é fornecer insights valiosos para aprimorar a performance dos atletas da academia.
+
+Referencial Teórico
+
+Este projeto usa de métodos estatísticos para coomprender o desempenho dos atletas. A análise de dados históricos é crucial para identificar padrões e tendências que informam estratégias de treinamento.  Com o udo de ... esse relatório busca... para... .
+
+Análises
+
+Análise 1 - Top 5 países com maior número de mulheres medalhistas (13/10)
+
+O cliente gostaria de entender quais países possuem um maior número de mulheres que conquistaram medalhas, em ordem do país com maior número de mulheres medalhistas para o país com menor número.
+
+{r}
+print(top_5_grafico)
+
+Análise 2 - Valor IMC por esporte, estes sendo, ginástica, futebol, judô, atletismo e badminton (20/10)
+
+O cliente deseja comparar os valores do Índice de Massa Corporal (IMC) entre atletas de diferentes esportes, especificamente ginástica, judô, atletismo e badminton, para entender a variação entre eles e identificar se algum esporte tende a ter IMCs geralmente menores, maiores ou se não há diferença significativa. Para isso, é necessário calcular o IMC de cada atleta utilizando a fórmula peso (kg) / altura (m)² e, em seguida, analisar os resultados para cada esporte selecionado, observando como os valores se comportam em relação aos esportes mencionados.
+
+Análise 3 - Top 3 medalhistas gerais por quantidade de cada tipo de medalha (27/10)
+
+O intuito dessa análise é primeiro entender quais são os 3 medalhistas com maior número de medalhas no total, e dentre eles, observar a quantidade de cada tipo de medalha que cada um destes atletas conquistou, sendo ouro, prata ou bronze. Existe relação entre o medalhista e cada tipo de medalha conquistada?
+
+Análise 4 - Variação Peso por Altura (03/10)
+
+O intuito é entender a relação entre o peso e altura dos atletas. À medida que o peso aumenta, a altura também aumenta? Ou o contrário, ou não tem diferença, ou não dá pra inferir nada? ● Para o relatório, vocês devem considerar apenas os atletas medalhistas;
+
+Conclusões
+
