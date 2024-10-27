@@ -1,4 +1,4 @@
-#codigo de copiar
+#Codigo que funciona
 #Pacotes
 
 library(readxl)
@@ -11,9 +11,6 @@ library(tinytex)
 library(gt)
 
 #Padronizações Estat
-
-:0 teste
-
 
 suppressMessages(suppressWarnings(
   suppressPackageStartupMessages(
@@ -154,7 +151,8 @@ IMC_por_esporte_grafico <- ggplot(Olimpiadas %>% filter(Sport %in% esportes_dese
                               "Gymnastics" = "Ginástica", 
                               "Judo" = "Judô")) +
   theme_estat()
-##resumo de valores para melhor entendimento
+
+#resumo de valores para melhor entendimento
 
 tabela_IMC <- Olimpiadas %>%
   filter(Sport %in% esportes_desejados) %>%
@@ -179,22 +177,85 @@ tabela_IMC <- Olimpiadas %>%
   )
 
 
-#Analise 3
+##Analise 3
 
 
-contagem_nomes <- Olimpiadas %>%
+atletas_medalhas <- Olimpiadas %>% #Filtrar o codigo em NA e pegar o top 3 po frequencia de ouros
+  mutate(medal_type = case_when(
+    Medal == "Gold" ~ "Gold",
+    Medal == "Silver" ~ "Silver",
+    Medal == "Bronze" ~ "Bronze",
+    TRUE ~ NA_character_
+  )) %>%
+  filter(!is.na(medal_type)) %>% 
+  group_by(Name, medal_type) %>%
+  summarise(freq = n(), .groups = 'drop') %>%
   group_by(Name) %>%
-  summarise(frequencia = n()) %>%
-  arrange(desc(frequencia))
+  mutate(freq_relativa = round(freq / sum(freq) * 100, 1))
 
-# 2. Selecionar os 3 nomes mais frequentes
-top3_nomes <- head(contagem_nomes, 3)
-
-# 3. Criar um dataframe com o número de medalhas
-
-medalhas_top3 <- Olimpiadas %>%
+atletas_medalhas_top3 <- atletas_medalhas %>%
   filter(Name %in% top3_nomes$Name) %>%
   group_by(Name) %>%
-  summarise(total_medalhas = sum(Medal))
+  summarise(freq_gold = sum(freq[medal_type == "Gold"]),
+            .groups = 'drop') %>%
+  arrange(desc(freq_gold)) %>%
+  left_join(atletas_medalhas, by = "Name") %>%
+  mutate(medal_type = fct_relevel(medal_type, "Gold", "Silver", "Bronze")) %>%
+  mutate(Name = fct_relevel(Name, unique(Name)))  # Reordena os nomes com base na nova ordenação
+
+porcentagens <- str_c(atletas_medalhas_top3$freq_relativa, "%") %>% str_replace("\\.", ",")
+legendas <- str_squish(str_c(atletas_medalhas_top3$freq, " (", porcentagens, ")"))
+
+atletas_medalhas_top3 <- atletas_medalhas_top3 %>%
+  mutate(medal_type = recode(medal_type,
+                             Gold = "Ouro",
+                             Silver = "Prata",
+                             Bronze = "Bronze"),
+         legendas = legendas)# Legendas
+
+ggplot(atletas_medalhas_top3) +
+  aes(
+    x = Name, y = freq,
+    fill = medal_type, label = legendas
+  ) +
+  geom_col(position = position_dodge2(preserve = "single", padding = 0)) +
+  geom_text(
+    position = position_dodge(width = 0.9),
+    vjust = -0.5, hjust = 0.5,
+    size = 3
+  ) +
+  labs(x = "Atletas", y = "Frequência de Medalhas", fill="Tipo de Medalha") +
+  theme_estat()#Visualizar
+
+ggsave("atletas_medalhas.pdf", width = 158, height = 93, units = "mm")# Salvar
+
+
+#calcular correlação e anova
+datacorrelacao <- data.frame(
+  Atleta = c("Michael Phelps", "Ryan Lochte", "Natalie Coughlin"),
+  Total = c(28,12,12),
+  Ouro = c(23,6,3),
+  Prata = c(3,3,4),
+  Bronze = c(2,3, 5)
+)
+
+datacorrelacao2 <- data.frame(
+  Atleta = c("Michael Phelps", "Ryan Lochte", "Natalie Coughlin"),
+  Total = c(28,12,12),
+)
+
+correlation_matrix <- cor(datacorrelacao[, c("Total", "Ouro", "Prata", "Bronze")])
+print(correlation_matrix)
+
+anova_total <- aov(Total ~ Atleta, data = datacorrelacao)
+summary(anova_total)
+anova_ouro <- aov(Ouro ~ Atleta, data = datacorrelacao)
+summary(anova_ouro)# ANOVA para Medalhas de Ouro
+anova_prata <- aov(Prata ~ Atleta, data = datacorrelacao)
+summary(anova_prata)# ANOVA para Medalhas de Prata
+anova_bronze <- aov(Bronze ~ Atleta, data = datacorrelacao)
+summary(anova_bronze)# ANOVA para Medalhas de Bronze
+tukey_ouro <- TukeyHSD(anova_ouro)
+print(tukey_ouro)# Teste de Tukey para Medalhas de Ouro
 
 
