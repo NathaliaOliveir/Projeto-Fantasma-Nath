@@ -103,17 +103,21 @@ Medalhistas_mulheres <- Olimpiadas %>%
 
 top_5 <- head(Medalhistas_mulheres, 5)
 
-top_5_grafico <- ggplot(top_5, aes(x = reorder(Team, total_medalhas), y = total_medalhas)) + 
-  geom_bar(stat = "identity", fill = "#a11d21") +  # Cor das barras
-   coord_flip() +
-  labs(title =,
-       x = "País",
+# Substituindo os nomes dos países
+top_5 <- top_5 %>%
+  mutate(Team = recode(Team, 
+                       `United States` = "Estados Unidos", 
+                       `Germany` = "Alemanha"))
+
+top_5_grafico <- ggplot(top_5, aes(x = reorder(Team, -total_medalhas), y = total_medalhas)) + 
+  geom_bar(stat = "identity", fill = "#a11d21") +
+  labs(       x = "País",
        y = "Número de Medalhas") +
-  theme_estat() +
+  theme_estat() +  # Use theme_minimal() ou outro tema que você preferir
   geom_text(aes(label = total_medalhas), 
-            position = position_stack(vjust = 1), 
-            hjust = -0.1,  # Ajuste horizontal para posicionar o texto
-            color = "black")  # Cor do texto
+            vjust = -0.5, 
+            color = "black")  
+
 print(top_5_grafico)
 
 ## Analise 2 - Análise 2 - Valor IMC por esporte
@@ -258,4 +262,21 @@ summary(anova_bronze)# ANOVA para Medalhas de Bronze
 tukey_ouro <- TukeyHSD(anova_ouro)
 print(tukey_ouro)# Teste de Tukey para Medalhas de Ouro
 
+##Analise 4
+
+
+atletas_medalhistas <- subset(Olimpiadas, Medal %in% c("Gold", "Silver", "Bronze"))
+
+ggplot(atletas_medalhistas) +
+  aes(x = Weight_kg, y = Height_m) +
+  geom_point(color = "#A11D21", size = 1) +  # Usar a cor para distinguir as medalhas
+  labs(
+    x = "Altura (cm)",
+    y = "Peso (kg)" # Legenda para a cor
+  ) +
+  theme_estat()
+
+
+
+ggsave("disp_uni.pdf", width = 158, height = 93, units = "mm")
 
