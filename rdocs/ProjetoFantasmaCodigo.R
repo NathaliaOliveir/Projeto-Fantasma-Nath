@@ -98,8 +98,8 @@ Olimpiadas <- rbind(Athenas, Beijing, London, Rio, Sydney)
 Medalhistas_mulheres <- Olimpiadas %>%
   filter(Sex == "F" & !is.na(Medal)) %>%
   group_by(Team) %>%
-  summarise(total_medalhas = n()) %>%
-  arrange(desc(total_medalhas))
+  summarise(total_mulheres = n_distinct(Name)) %>%
+  arrange(desc(total_mulheres))
 
 top_5 <- head(Medalhistas_mulheres, 5)
 
@@ -109,12 +109,12 @@ top_5 <- top_5 %>%
                        `United States` = "Estados Unidos", 
                        `Germany` = "Alemanha"))
 
-top_5_grafico <- ggplot(top_5, aes(x = reorder(Team, -total_medalhas), y = total_medalhas)) + 
+top_5_grafico <- ggplot(top_5, aes(x = reorder(Team, -total_mulheres), y = total_mulheres)) + 
   geom_bar(stat = "identity", fill = "#a11d21") +
   labs(       x = "País",
        y = "Número de Medalhas") +
-  theme_estat() +  # Use theme_minimal() ou outro tema que você preferir
-  geom_text(aes(label = total_medalhas), 
+  theme_estat() +  
+  geom_text(aes(label = total_mulheres), 
             vjust = -0.5, 
             color = "black")  
 
@@ -157,29 +157,71 @@ IMC_por_esporte_grafico <- ggplot(Olimpiadas %>% filter(Sport %in% esportes_dese
   theme_estat()
 
 #resumo de valores para melhor entendimento
+print_quadro_resumo <- function(data, var_name, title="Medidas resumo
+da(o) [nome da variável]", label="quad:quadro_resumo1")
+{
+  var_name <- substitute(var_name)
+  data <- data %>%
+    summarize(`Média` = round(mean(!!sym(var_name)),2),
+              `Desvio Padrão` = round(sd(!!sym(var_name)),2),
+              `Variância` = round(var(!!sym(var_name)),2),
+              `Mínimo` = round(min(!!sym(var_name)),2),
+              `1º Quartil` = round(quantile(!!sym(var_name), probs =
+                                              .25),2),
+              `Mediana` = round(quantile(!!sym(var_name), probs = .5)
+                                ,2),
+              `3º Quartil` = round(quantile(!!sym(var_name), probs =
+                                              .75),2),
+              `Máximo` = round(max(!!sym(var_name)),2)) %>%
+    mutate(
+      Sport = recode(Sport,
+                     "Badminton" = "Badminton", 
+                     "Athletics" = "Atletismo", 
+                     "Gymnastics" = "Ginástica", 
+                     "Judo" = "Judô",
+                     "Football"="Futebol")  %>%
+    t() %>%
+    as.data.frame() %>%
+    rownames_to_column()
+)
+
+ 
 
 tabela_IMC <- Olimpiadas %>%
-  filter(Sport %in% esportes_desejados) %>%
-  group_by(Sport) %>%
-  summarise(
-    Media_IMC = mean(IMC, na.rm = TRUE),
-    Variancia_IMC = var(IMC, na.rm = TRUE)
-  ) %>%
-  mutate(
-    Sport = recode(Sport,
-                   "Badminton" = "Badminton", 
-                   "Athletics" = "Atletismo", 
-                   "Gymnastics" = "Ginástica", 
-                   "Judo" = "Judô"),
-    Media_IMC = round(Media_IMC, 2),
-    Variancia_IMC = round(Variancia_IMC, 2)
-  ) %>%
-  rename(
-    Esporte = Sport,
-    `Média IMC` = Media_IMC,
-    `Variância IMC` = Variancia_IMC
-  )
+    filter(Sport %in% esportes_desejados) %>%
+    group_by(Sport) %>%
+    summarise(
+      Media_IMC = mean(IMC, na.rm = TRUE),
+      Variancia_IMC = var(IMC, na.rm = TRUE),
+      Desvio_Padrao_IMC = sd(IMC, na.rm = TRUE),
+      Minimo_IMC = min(IMC, na.rm = TRUE),
+      Primeiro_Quartil_IMC = quantile(IMC, 0.25, na.rm = TRUE),
+      Mediana_IMC = median(IMC, na.rm = TRUE),
+      Terceiro_Quartil_IMC = quantile(IMC, 0.75, na.rm = TRUE),
+      Maximo_IMC = max(IMC, na.rm = TRUE)
+    ) %>%
+    mutate(
+      Sport = recode(Sport,
+                     "Badminton" = "Badminton", 
+                     "Athletics" = "Atletismo", 
+                     "Gymnastics" = "Ginástica", 
+                     "Judo" = "Judô",
+                     "Football" = "Futebol"),
+      Media_IMC = round(Media_IMC, 2),
+      Variancia_IMC = round(Variancia_IMC, 2),
+      Desvio_Padrao_IMC = round(Desvio_Padrao_IMC, 2),
+      Minimo_IMC = round(Minimo_IMC, 2),
+      Primeiro_Quartil_IMC = round(Primeiro_Quartil_IMC, 2),
+      Mediana_IMC = round(Mediana_IMC, 2),
+      Terceiro_Quartil_IMC = round(Terceiro_Quartil_IMC, 2),
+      Maximo_IMC = round(Maximo_IMC, 2)
+    ) %>%
+    rename(
+      Esporte = Sport
+    )
 
+  print(tabela_IMC)
+  
 
 ##Analise 3
 
