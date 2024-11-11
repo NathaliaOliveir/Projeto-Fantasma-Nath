@@ -124,21 +124,21 @@ print(top_5_grafico)
 
 #Calculo IMC
 
-Olimpiadas$Weight_kg <- Olimpiadas$Weight * 0.453592  # Converter peso para kg
-Olimpiadas$Height_m <- Olimpiadas$Height / 100     # Converter altura para m
-Olimpiadas$IMC <- Olimpiadas$Weight_kg / (Olimpiadas$Height_m^2)# Calcular IMC
+Olimpiadas$Weight_kg <- Olimpiadas$Weight * 0.453592  
+Olimpiadas$Height_m <- Olimpiadas$Height / 100     
+Olimpiadas$IMC <- Olimpiadas$Weight_kg / (Olimpiadas$Height_m^2)
 
 #iIMC por esporte
 
 esportes_desejados <- c("Gymnastics", "Football", "Judo", "Athletics", "Badminton")
 
 IMC_filtrado <- Olimpiadas %>%
-  filter(Sport %in% esportes_desejados) %>%  # Filtra os esportes
-  group_by(Sport) %>%                        # Agrupa por esporte
+  filter(Sport %in% esportes_desejados) %>%  
+  group_by(Sport) %>%                       
   summarise(
-    media_imc = mean(IMC, na.rm = TRUE),      # Média do IMC
-    sd_imc = sd(IMC, na.rm = TRUE),          # Desvio padrão do IMC
-    n = n()                                   # Número de atletas por esporte
+    media_imc = mean(IMC, na.rm = TRUE),     
+    sd_imc = sd(IMC, na.rm = TRUE),         
+    n = n()                                   
   )
 
 # Visualização
@@ -220,8 +220,7 @@ tabela_IMC <- Olimpiadas %>%
       Esporte = Sport
     )
 
-  print(tabela_IMC)
-  
+print(tabela_IMC)
 
 ##Analise 3
 
@@ -247,7 +246,7 @@ atletas_medalhas_top3 <- atletas_medalhas %>%
   arrange(desc(freq_gold)) %>%
   left_join(atletas_medalhas, by = "Name") %>%
   mutate(medal_type = fct_relevel(medal_type, "Gold", "Silver", "Bronze")) %>%
-  mutate(Name = fct_relevel(Name, unique(Name)))  # Reordena os nomes com base na nova ordenação
+  mutate(Name = fct_relevel(Name, unique(Name)))  
 
 porcentagens <- str_c(atletas_medalhas_top3$freq_relativa, "%") %>% str_replace("\\.", ",")
 legendas <- str_squish(str_c(atletas_medalhas_top3$freq, " (", porcentagens, ")"))
@@ -257,7 +256,7 @@ atletas_medalhas_top3 <- atletas_medalhas_top3 %>%
                              Gold = "Ouro",
                              Silver = "Prata",
                              Bronze = "Bronze"),
-         legendas = legendas)# Legendas
+         legendas = legendas)
 
 ggplot(atletas_medalhas_top3) +
   aes(
@@ -271,19 +270,31 @@ ggplot(atletas_medalhas_top3) +
     size = 3
   ) +
   labs(x = "Atletas", y = "Frequência de Medalhas", fill="Tipo de Medalha") +
-  theme_estat()#Visualizar
+  theme_estat()#
 
-ggsave("atletas_medalhas.pdf", width = 158, height = 93, units = "mm")# Salvar
+ggsave("atletas_medalhas.pdf", width = 158, height = 93, units = "mm")
 
 
 #calcular correlação e anova
-datacorrelacao <- data.frame(
+dados_analise3 <- data.frame(
   Atleta = c("Michael Phelps", "Ryan Lochte", "Natalie Coughlin"),
   Total = c(28,12,12),
   Ouro = c(23,6,3),
   Prata = c(3,3,4),
   Bronze = c(2,3, 5)
 )
+dados_tabela <- dados_analise3[, c("Ouro", "Prata", "Bronze")]
+teste_chi <- chisq.test(dados_tabela)
+print(teste_chi)
+
+anova_analise3 <- data.frame(
+  Atleta = c("Michael Phelps", "Ryan Lochte", "Natalie Coughlin"),
+  Total = c(28, 12, 12)
+)
+anova_resultado <- aov(Total ~ Atleta, data = anova_analise3)
+summary(anova_resultado)
+
+####rascunho da 3
 
 datacorrelacao2 <- data.frame(
   Atleta = c("Michael Phelps", "Ryan Lochte", "Natalie Coughlin"),
@@ -304,6 +315,8 @@ summary(anova_bronze)# ANOVA para Medalhas de Bronze
 tukey_ouro <- TukeyHSD(anova_ouro)
 print(tukey_ouro)# Teste de Tukey para Medalhas de Ouro
 
+##desisti da anova e da correlação aqui
+
 ##Analise 4
 
 
@@ -311,14 +324,15 @@ atletas_medalhistas <- subset(Olimpiadas, Medal %in% c("Gold", "Silver", "Bronze
 
 ggplot(atletas_medalhistas) +
   aes(x = Weight_kg, y = Height_m) +
-  geom_point(color = "#A11D21", size = 1) +  # Usar a cor para distinguir as medalhas
+  geom_jitter(color = "#A11D21", size = 1) +  
   labs(
     x = "Altura (cm)",
-    y = "Peso (kg)" # Legenda para a cor
+    y = "Peso (kg)"
   ) +
   theme_estat()
 
 
-
+resultado_corr <- cor.test(atletas_medalhistas$Weight_kg, atletas_medalhistas$Height_m, method = "pearson")
+print(resultado_corr)
 ggsave("disp_uni.pdf", width = 158, height = 93, units = "mm")
 
