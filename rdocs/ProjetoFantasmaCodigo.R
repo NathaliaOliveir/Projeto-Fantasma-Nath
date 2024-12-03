@@ -1,4 +1,4 @@
-#Codigo que funciona
+#codigo que funciona
 #Pacotes
 
 library(readxl)
@@ -11,6 +11,7 @@ library(tinytex)
 library(gt)
 
 #Padronizações Estat
+
 
 suppressMessages(suppressWarnings(
   suppressPackageStartupMessages(
@@ -93,52 +94,56 @@ Sydney$Year <- 2000
 
 Olimpiadas <- rbind(Athenas, Beijing, London, Rio, Sydney)
 
+write_xlsx(Olimpiadas,"C:/Users/Nathalia/OneDrive/Documentos/Labest")
+
+write.table(Olimpiadas)
+
+install.packages("writexl")
+library(writexl)
+write_xlsx(Olimpiadas, "olimpiadas_nova_tabela.xlsx")
+
 ## Analise 1 - Top paises medalhistas
 
 Medalhistas_mulheres <- Olimpiadas %>%
   filter(Sex == "F" & !is.na(Medal)) %>%
   group_by(Team) %>%
-  summarise(total_mulheres = n_distinct(Name)) %>%
-  arrange(desc(total_mulheres))
+  summarise(total_medalhas = n()) %>%
+  arrange(desc(total_medalhas))
 
 top_5 <- head(Medalhistas_mulheres, 5)
 
-# Substituindo os nomes dos países
-top_5 <- top_5 %>%
-  mutate(Team = recode(Team, 
-                       `United States` = "Estados Unidos", 
-                       `Germany` = "Alemanha"))
-
-top_5_grafico <- ggplot(top_5, aes(x = reorder(Team, -total_mulheres), y = total_mulheres)) + 
-  geom_bar(stat = "identity", fill = "#a11d21") +
-  labs(       x = "País",
+top_5_grafico <- ggplot(top_5, aes(x = reorder(Team, total_medalhas), y = total_medalhas)) + 
+  geom_bar(stat = "identity", fill = "#a11d21") +  # Cor das barras
+   coord_flip() +
+  labs(title =,
+       x = "País",
        y = "Número de Medalhas") +
-  theme_estat() +  
-  geom_text(aes(label = total_mulheres), 
-            vjust = -0.5, 
-            color = "black")  
-
+  theme_estat() +
+  geom_text(aes(label = total_medalhas), 
+            position = position_stack(vjust = 1), 
+            hjust = -0.1,  # Ajuste horizontal para posicionar o texto
+            color = "black")  # Cor do texto
 print(top_5_grafico)
 
 ## Analise 2 - Análise 2 - Valor IMC por esporte
 
 #Calculo IMC
 
-Olimpiadas$Weight_kg <- Olimpiadas$Weight * 0.453592  
-Olimpiadas$Height_m <- Olimpiadas$Height / 100     
-Olimpiadas$IMC <- Olimpiadas$Weight_kg / (Olimpiadas$Height_m^2)
+Olimpiadas$Weight_kg <- Olimpiadas$Weight * 0.453592  # Converter peso para kg
+Olimpiadas$Height_m <- Olimpiadas$Height / 100     # Converter altura para m
+Olimpiadas$IMC <- Olimpiadas$Weight_kg / (Olimpiadas$Height_m^2)# Calcular IMC
 
 #iIMC por esporte
 
 esportes_desejados <- c("Gymnastics", "Football", "Judo", "Athletics", "Badminton")
 
 IMC_filtrado <- Olimpiadas %>%
-  filter(Sport %in% esportes_desejados) %>%  
-  group_by(Sport) %>%                       
+  filter(Sport %in% esportes_desejados) %>%  # Filtra os esportes
+  group_by(Sport) %>%                        # Agrupa por esporte
   summarise(
-    media_imc = mean(IMC, na.rm = TRUE),     
-    sd_imc = sd(IMC, na.rm = TRUE),         
-    n = n()                                   
+    media_imc = mean(IMC, na.rm = TRUE),      # Média do IMC
+    sd_imc = sd(IMC, na.rm = TRUE),          # Desvio padrão do IMC
+    n = n()                                   # Número de atletas por esporte
   )
 
 # Visualização
@@ -155,184 +160,42 @@ IMC_por_esporte_grafico <- ggplot(Olimpiadas %>% filter(Sport %in% esportes_dese
                               "Gymnastics" = "Ginástica", 
                               "Judo" = "Judô")) +
   theme_estat()
-
-#resumo de valores para melhor entendimento
-print_quadro_resumo <- function(data, var_name, title="Medidas resumo
-da(o) [nome da variável]", label="quad:quadro_resumo1")
-{
-  var_name <- substitute(var_name)
-  data <- data %>%
-    summarize(`Média` = round(mean(!!sym(var_name)),2),
-              `Desvio Padrão` = round(sd(!!sym(var_name)),2),
-              `Variância` = round(var(!!sym(var_name)),2),
-              `Mínimo` = round(min(!!sym(var_name)),2),
-              `1º Quartil` = round(quantile(!!sym(var_name), probs =
-                                              .25),2),
-              `Mediana` = round(quantile(!!sym(var_name), probs = .5)
-                                ,2),
-              `3º Quartil` = round(quantile(!!sym(var_name), probs =
-                                              .75),2),
-              `Máximo` = round(max(!!sym(var_name)),2)) %>%
-    mutate(
-      Sport = recode(Sport,
-                     "Badminton" = "Badminton", 
-                     "Athletics" = "Atletismo", 
-                     "Gymnastics" = "Ginástica", 
-                     "Judo" = "Judô",
-                     "Football"="Futebol")  %>%
-    t() %>%
-    as.data.frame() %>%
-    rownames_to_column()
-)
-
- 
+##resumo de valores para melhor entendimento
 
 tabela_IMC <- Olimpiadas %>%
-    filter(Sport %in% esportes_desejados) %>%
-    group_by(Sport) %>%
-    summarise(
-      Media_IMC = mean(IMC, na.rm = TRUE),
-      Variancia_IMC = var(IMC, na.rm = TRUE),
-      Desvio_Padrao_IMC = sd(IMC, na.rm = TRUE),
-      Minimo_IMC = min(IMC, na.rm = TRUE),
-      Primeiro_Quartil_IMC = quantile(IMC, 0.25, na.rm = TRUE),
-      Mediana_IMC = median(IMC, na.rm = TRUE),
-      Terceiro_Quartil_IMC = quantile(IMC, 0.75, na.rm = TRUE),
-      Maximo_IMC = max(IMC, na.rm = TRUE)
-    ) %>%
-    mutate(
-      Sport = recode(Sport,
-                     "Badminton" = "Badminton", 
-                     "Athletics" = "Atletismo", 
-                     "Gymnastics" = "Ginástica", 
-                     "Judo" = "Judô",
-                     "Football" = "Futebol"),
-      Media_IMC = round(Media_IMC, 2),
-      Variancia_IMC = round(Variancia_IMC, 2),
-      Desvio_Padrao_IMC = round(Desvio_Padrao_IMC, 2),
-      Minimo_IMC = round(Minimo_IMC, 2),
-      Primeiro_Quartil_IMC = round(Primeiro_Quartil_IMC, 2),
-      Mediana_IMC = round(Mediana_IMC, 2),
-      Terceiro_Quartil_IMC = round(Terceiro_Quartil_IMC, 2),
-      Maximo_IMC = round(Maximo_IMC, 2)
-    ) %>%
-    rename(
-      Esporte = Sport
-    )
-
-print(tabela_IMC)
-
-##Analise 3
+  filter(Sport %in% esportes_desejados) %>%
+  group_by(Sport) %>%
+  summarise(
+    Media_IMC = mean(IMC, na.rm = TRUE),
+    Variancia_IMC = var(IMC, na.rm = TRUE)
+  ) %>%
+  mutate(
+    Sport = recode(Sport,
+                   "Badminton" = "Badminton", 
+                   "Athletics" = "Atletismo", 
+                   "Gymnastics" = "Ginástica", 
+                   "Judo" = "Judô"),
+    Media_IMC = round(Media_IMC, 2),
+    Variancia_IMC = round(Variancia_IMC, 2)
+  ) %>%
+  rename(
+    Esporte = Sport,
+    `Média IMC` = Media_IMC,
+    `Variância IMC` = Variancia_IMC
+  )
 
 
-atletas_medalhas <- Olimpiadas %>% #Filtrar o codigo em NA e pegar o top 3 po frequencia de ouros
-  mutate(medal_type = case_when(
-    Medal == "Gold" ~ "Gold",
-    Medal == "Silver" ~ "Silver",
-    Medal == "Bronze" ~ "Bronze",
-    TRUE ~ NA_character_
-  )) %>%
-  filter(!is.na(medal_type)) %>% 
-  group_by(Name, medal_type) %>%
-  summarise(freq = n(), .groups = 'drop') %>%
-  group_by(Name) %>%
-  mutate(freq_relativa = round(freq / sum(freq) * 100, 1))
-
-atletas_medalhas_top3 <- atletas_medalhas %>%
-  filter(Name %in% top3_nomes$Name) %>%
-  group_by(Name) %>%
-  summarise(freq_gold = sum(freq[medal_type == "Gold"]),
-            .groups = 'drop') %>%
-  arrange(desc(freq_gold)) %>%
-  left_join(atletas_medalhas, by = "Name") %>%
-  mutate(medal_type = fct_relevel(medal_type, "Gold", "Silver", "Bronze")) %>%
-  mutate(Name = fct_relevel(Name, unique(Name)))  
-
-porcentagens <- str_c(atletas_medalhas_top3$freq_relativa, "%") %>% str_replace("\\.", ",")
-legendas <- str_squish(str_c(atletas_medalhas_top3$freq, " (", porcentagens, ")"))
-
-atletas_medalhas_top3 <- atletas_medalhas_top3 %>%
-  mutate(medal_type = recode(medal_type,
-                             Gold = "Ouro",
-                             Silver = "Prata",
-                             Bronze = "Bronze"),
-         legendas = legendas)
-
-ggplot(atletas_medalhas_top3) +
-  aes(
-    x = Name, y = freq,
-    fill = medal_type, label = legendas
-  ) +
-  geom_col(position = position_dodge2(preserve = "single", padding = 0)) +
-  geom_text(
-    position = position_dodge(width = 0.9),
-    vjust = -0.5, hjust = 0.5,
-    size = 3
-  ) +
-  labs(x = "Atletas", y = "Frequência de Medalhas", fill="Tipo de Medalha") +
-  theme_estat()#
-
-ggsave("atletas_medalhas.pdf", width = 158, height = 93, units = "mm")
+#Analise 3
 
 
-#calcular correlação e anova
-dados_analise3 <- data.frame(
-  Atleta = c("Michael Phelps", "Ryan Lochte", "Natalie Coughlin"),
-  Total = c(28,12,12),
-  Ouro = c(23,6,3),
-  Prata = c(3,3,4),
-  Bronze = c(2,3, 5)
-)
-dados_tabela <- dados_analise3[, c("Ouro", "Prata", "Bronze")]
-teste_chi <- chisq.test(dados_tabela)
-print(teste_chi)
+medalhistas_an3 <- Olimpiadas[!is.na(Olimpiadas$Medal), ]
 
-anova_analise3 <- data.frame(
-  Atleta = c("Michael Phelps", "Ryan Lochte", "Natalie Coughlin"),
-  Total = c(28, 12, 12)
-)
-anova_resultado <- aov(Total ~ Atleta, data = anova_analise3)
-summary(anova_resultado)
+# Contar as ocorrências de cada nome na coluna names
+name_counts <- table(medalhistas_an3)
 
-####rascunho da 3
+# Encontrar o nome que mais se repete
+most_frequent_name <- names(name_counts)[which.max(name_counts)]
 
-datacorrelacao2 <- data.frame(
-  Atleta = c("Michael Phelps", "Ryan Lochte", "Natalie Coughlin"),
-  Total = c(28,12,12),
-)
-
-correlation_matrix <- cor(datacorrelacao[, c("Total", "Ouro", "Prata", "Bronze")])
-print(correlation_matrix)
-
-anova_total <- aov(Total ~ Atleta, data = datacorrelacao)
-summary(anova_total)
-anova_ouro <- aov(Ouro ~ Atleta, data = datacorrelacao)
-summary(anova_ouro)# ANOVA para Medalhas de Ouro
-anova_prata <- aov(Prata ~ Atleta, data = datacorrelacao)
-summary(anova_prata)# ANOVA para Medalhas de Prata
-anova_bronze <- aov(Bronze ~ Atleta, data = datacorrelacao)
-summary(anova_bronze)# ANOVA para Medalhas de Bronze
-tukey_ouro <- TukeyHSD(anova_ouro)
-print(tukey_ouro)# Teste de Tukey para Medalhas de Ouro
-
-##desisti da anova e da correlação aqui
-
-##Analise 4
-
-
-atletas_medalhistas <- subset(Olimpiadas, Medal %in% c("Gold", "Silver", "Bronze"))
-
-ggplot(atletas_medalhistas) +
-  aes(x = Weight_kg, y = Height_m) +
-  geom_jitter(color = "#A11D21", size = 1) +  
-  labs(
-    x = "Altura (cm)",
-    y = "Peso (kg)"
-  ) +
-  theme_estat()
-
-
-resultado_corr <- cor.test(atletas_medalhistas$Weight_kg, atletas_medalhistas$Height_m, method = "pearson")
-print(resultado_corr)
-ggsave("disp_uni.pdf", width = 158, height = 93, units = "mm")
+# Exibir o resultado
+most_frequent_name
 
